@@ -29,15 +29,15 @@ namespace Service.ApiKeys.AutoNazar.Jobs
             ILogger<AutoNazarJob> logger,
             IMyNoSqlServerDataReader<ApiKeyRecordNoSql> reader,
             ITelegramBotClient telegramBotClient,
-            AutoNazarEncryptionKeyStorage encryptionKeyStorage) 
+            AutoNazarEncryptionKeyStorage encryptionKeyStorage)
         {
             _logger = logger;
             _reader = reader;
             _telegramBotClient = telegramBotClient;
             _encryptionKeyStorage = encryptionKeyStorage;
-            _timer = new MyTaskTimer(typeof(AutoNazarJob), 
-                TimeSpan.FromSeconds(Program.Settings.CheckPeriodInSeconds), 
-                logger, 
+            _timer = new MyTaskTimer(typeof(AutoNazarJob),
+                TimeSpan.FromSeconds(Program.Settings.CheckPeriodInSeconds),
+                logger,
                 DoProcess);
             _retryPolicy = Policy
                           .Handle<Exception>()
@@ -75,7 +75,7 @@ namespace Service.ApiKeys.AutoNazar.Jobs
                         isEncryptionKeySet = encryptionKeys?.Ids?.Any(x => x == item.ApiKey.EncryptionKeyId) ?? false;
                     });
 
-                    _logger.LogInformation("Checking for: {item}, isApiKeySet: {isApiKeySet}, isEncryptionKeySet: {isEncryptionKeySet}", 
+                    _logger.LogInformation("Checking for: {item}, isApiKeySet: {isApiKeySet}, isEncryptionKeySet: {isEncryptionKeySet}",
                         item.ToJson(), isApiKeySet, isEncryptionKeySet);
 
                     if (isApiKeySet && !isEncryptionKeySet)
@@ -84,7 +84,7 @@ namespace Service.ApiKeys.AutoNazar.Jobs
 
                         if (encKey == null)
                         {
-                            await _telegramBotClient.SendTextMessageAsync(Program.Settings.TelegramChatId, 
+                            await _telegramBotClient.SendTextMessageAsync(Program.Settings.TelegramChatId,
                                 $"AutoNazar has no key! {item.ApiKey.ApplicationName} {item.ApiKey.EncryptionKeyId}!");
                             return;
                         }
@@ -95,6 +95,16 @@ namespace Service.ApiKeys.AutoNazar.Jobs
                             EncryptionKey = encKey.EncryptionKeyValue,
                             Id = item.ApiKey.EncryptionKeyId,
                         });
+
+                        if (response.Error != null)
+                        {
+                            _logger.LogError("When AutoNazarJob this error happened: {error}", response.Error.ToJson());
+                        }
+                        else
+                        {
+                            _logger.LogInformation("Encryption is set for: {item}, isApiKeySet: {isApiKeySet}, isEncryptionKeySet: {isEncryptionKeySet}",
+                        item.ToJson(), isApiKeySet, true);
+                        }
                     }
                 }
             }
