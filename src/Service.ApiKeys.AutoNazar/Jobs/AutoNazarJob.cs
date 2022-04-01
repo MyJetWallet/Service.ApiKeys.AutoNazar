@@ -78,16 +78,18 @@ namespace Service.ApiKeys.AutoNazar.Jobs
                     _logger.LogInformation("Checking for: {item}, isApiKeySet: {isApiKeySet}, isEncryptionKeySet: {isEncryptionKeySet}",
                         item.ToJson(), isApiKeySet, isEncryptionKeySet);
 
+                    var encKey = _encryptionKeyStorage.GetEncryptionKey($"{item.ApiKey.ApplicationName}_{item.ApiKey.EncryptionKeyId}");
+
+                    if (encKey == null)
+                    {
+                        await _telegramBotClient.SendTextMessageAsync(Program.Settings.TelegramChatId,
+                            $"AutoNazar has no key! {item.ApiKey.ApplicationName} {item.ApiKey.EncryptionKeyId}!");
+                    }
+
                     if (isApiKeySet && !isEncryptionKeySet)
                     {
-                        var encKey = _encryptionKeyStorage.GetEncryptionKey($"{item.ApiKey.ApplicationName}_{item.ApiKey.EncryptionKeyId}");
-
                         if (encKey == null)
-                        {
-                            await _telegramBotClient.SendTextMessageAsync(Program.Settings.TelegramChatId,
-                                $"AutoNazar has no key! {item.ApiKey.ApplicationName} {item.ApiKey.EncryptionKeyId}!");
-                            return;
-                        }
+                        { return; }
 
                         var response = await encryptionKeyGrpcService.SetEncryptionKeyAsync(new MyJetWallet.ApiSecurityManager.Grpc.Models.SetEncryptionKeyRequest
                         {
