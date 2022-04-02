@@ -76,6 +76,18 @@ namespace MyJetWallet.ApiSecurityManager.Grpc.Services
                     CheckWord = request.CheckWord,
                 });
 
+                if (response.Error != null)
+                {
+                    _logger?.LogError("SetEncryptionKeyAsync Error: {context}",
+                    (new {request.Id, response.Error}).ToJson());
+                    _encryptionKeyStorage.RemoveEncryptionKey(autoNazarId);
+
+                    return new SetEncryptionKeyResponse
+                    {
+                        ActivatedIds = Array.Empty<string>(),
+                    };
+                }
+
                 if (response.ActivatedIds?.Any() ?? false)
                 {
                     return new SetEncryptionKeyResponse
@@ -83,8 +95,6 @@ namespace MyJetWallet.ApiSecurityManager.Grpc.Services
                         ActivatedIds = response.ActivatedIds,
                     };
                 }
-
-                _encryptionKeyStorage.RemoveEncryptionKey(autoNazarId);
 
                 return new SetEncryptionKeyResponse
                 {
