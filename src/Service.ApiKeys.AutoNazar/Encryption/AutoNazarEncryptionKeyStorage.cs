@@ -1,6 +1,5 @@
 ﻿using MyJetWallet.ApiSecurityManager.SymmetricEncryption;
 using MyJetWallet.Sdk.Service;
-using Service.ApiKeys.AutoNazar.Services;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
