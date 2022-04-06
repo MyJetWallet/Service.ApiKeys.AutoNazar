@@ -78,7 +78,7 @@ namespace Service.ApiKeys.AutoNazar.Jobs
                     _logger.LogInformation("Checking for: {item}, isApiKeySet: {isApiKeySet}, isEncryptionKeySet: {isEncryptionKeySet}",
                         item.ToJson(), isApiKeySet, isEncryptionKeySet);
 
-                    var encKey = _encryptionKeyStorage.GetEncryptionKey($"{item.ApiKey.ApplicationName}_{item.ApiKey.EncryptionKeyId}");
+                    var encKey = _encryptionKeyStorage.GetEncryptionKey($"{item.ApiKey.EncryptionKeyId}");
 
                     if (encKey == null)
                     {

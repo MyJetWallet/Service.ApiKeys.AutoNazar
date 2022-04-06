@@ -54,7 +54,7 @@ namespace MyJetWallet.ApiSecurityManager.Grpc.Services
         {
             _logger.LogInformation("SetEncryptionKeyResponse {context}", request.Id);
 
-            var autoNazarId = $"{request.ServiceName}_{request.Id}";
+            //var autoNazarId = $"{request.ServiceName}_{request.Id}";
 
             try
             {
@@ -63,7 +63,7 @@ namespace MyJetWallet.ApiSecurityManager.Grpc.Services
                     ServiceName = request.ServiceName,
                     EncryptionKeyValue = request.EncryptionKey,
                     CheckWord = request.CheckWord,
-                    Id = autoNazarId,
+                    Id = request.Id,
                 });
 
                 var factory = new Autofac.ApiSecurityManagerClientFactory(request.ServiceUri);
@@ -80,7 +80,7 @@ namespace MyJetWallet.ApiSecurityManager.Grpc.Services
                 {
                     _logger?.LogError("SetEncryptionKeyAsync Error: {context}",
                     (new {request.Id, response.Error}).ToJson());
-                    _encryptionKeyStorage.RemoveEncryptionKey(autoNazarId);
+                    _encryptionKeyStorage.RemoveEncryptionKey(request.Id);
 
                     return new SetEncryptionKeyResponse
                     {
@@ -106,7 +106,7 @@ namespace MyJetWallet.ApiSecurityManager.Grpc.Services
                 _logger?.LogError(e, "SetEncryptionKeyAsync Error: {context}",
                     request.Id);
 
-                _encryptionKeyStorage.RemoveEncryptionKey(autoNazarId);
+                _encryptionKeyStorage.RemoveEncryptionKey(request.Id);
 
                 return new SetEncryptionKeyResponse
                 {
