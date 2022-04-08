@@ -56,20 +56,17 @@ namespace Service.ApiKeys.AutoNazar.Jobs
                 foreach (var item in all)
                 {
                     _logger.LogInformation("Checking for: {item}", item.ToJson());
+                    //var isApiKeySet = false;
 
-                    var factory = new ApiSecurityManagerClientFactory(item.ApiKey.ApplicationUri);
-                    var apiKeyClient = factory.GetApiKeyService();
-                    var isApiKeySet = false;
+                    //await _retryPolicy.ExecuteAsync(async () =>
+                    //{
+                    //    var apiKeys = await apiKeyClient.GetApiKeyIdsAsync(new MyJetWallet.ApiSecurityManager.Grpc.Models.GetApiKeyIdsRequest());
 
-                    await _retryPolicy.ExecuteAsync(async () =>
-                    {
-                        var apiKeys = await apiKeyClient.GetApiKeyIdsAsync(new MyJetWallet.ApiSecurityManager.Grpc.Models.GetApiKeyIdsRequest());
+                    //    isApiKeySet = apiKeys?.Ids?.Any(x => x == item.ApiKey.ApiKeyId) ?? false;
+                    //});
 
-                        isApiKeySet = apiKeys?.Ids?.Any(x => x == item.ApiKey.ApiKeyId) ?? false;
-                    });
-
-                    _logger.LogInformation("Checking for: {item}, isApiKeySet: {isApiKeySet}",
-                        item.ToJson(), isApiKeySet);
+                    _logger.LogInformation("Checking for: {item}",
+                        item.ToJson());
 
                     var encKey = _encryptionKeyStorage.GetEncryptionKey(item.ApiKey.EncryptionKeyId);
 
@@ -91,6 +88,9 @@ namespace Service.ApiKeys.AutoNazar.Jobs
                         continue;
                     }
 
+                    var factory = new ApiSecurityManagerClientFactory(item.ApiKey.ApplicationUri);
+                    var apiKeyClient = factory.GetApiKeyService();
+
                     var response = await apiKeyClient.SetApiKeysAsync(
                         new MyJetWallet.ApiSecurityManager.Grpc.Models.SetApiKeyRequest
                         {
@@ -106,8 +106,8 @@ namespace Service.ApiKeys.AutoNazar.Jobs
                     }
                     else
                     {
-                        _logger.LogInformation("ApiKey is set for: {item}, isApiKeySet: {isApiKeySet}",
-                                                item.ToJson(), isApiKeySet);
+                        _logger.LogInformation("ApiKey is set for: {item}",
+                                                item.ToJson());
                     }
                 }
             }
