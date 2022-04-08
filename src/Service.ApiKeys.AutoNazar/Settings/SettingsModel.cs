@@ -27,7 +27,7 @@ namespace Service.ApiKeys.AutoNazar.Settings
         [YamlProperty("AutoNazar.CheckPeriodInSeconds")]
         public int CheckPeriodInSeconds { get; set; }
 
-        [YamlProperty("AuthApi.MyNoSqlWriterUrl")]
+        [YamlProperty("AutoNazar.MyNoSqlWriterUrl")]
         public string MyNoSqlWriterUrl { get; set; }
     }
 }

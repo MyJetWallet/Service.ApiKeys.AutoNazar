@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using MyJetWallet.ApiSecurityManager.Autofac;
 using MyJetWallet.Sdk.Service;
 using Service.ApiKeys.AutoNazar.Domain;
 using Service.ApiKeys.AutoNazar.Domain.Models.ApiKeys;
@@ -62,6 +63,22 @@ namespace MyJetWallet.ApiSecurityManager.Grpc.Services
 
             try
             {
+                var factory = new ApiSecurityManagerClientFactory(request.ApplicationUri);
+                var apiKeyService = factory.GetApiKeyService();
+
+                var response = await apiKeyService.SetApiKeysAsync(new ()
+                {
+                    ApiKey = request.ApiKey,
+                    ApiKeyId = request.ApiKeyId,
+                    EncryptionKeyId = request.EncryptionKeyId,
+                    PrivateKey = privateKey,
+                });
+
+                if (response.Error != null)
+                {
+                    throw new Exception($"Grpc Error from application: {request.ApplicationUri} {response.Error.Code}:{response.Error.Message}");
+                }
+
                 await _apiKeyStorage.AddOrUpdate(ApiKey.Create(
                     request.ApiKeyId,
                     request.ApiKey,

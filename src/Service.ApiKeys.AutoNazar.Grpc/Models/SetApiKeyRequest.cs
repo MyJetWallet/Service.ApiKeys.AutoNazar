@@ -24,5 +24,7 @@ namespace Service.ApiKeys.AutoNazar.Grpc.Models
 
         [DataMember(Order = 5)]
         public string CheckWord { get; set; }
+        [DataMember(Order = 6)] 
+        public string ApplicationUri { get; set; }
     }
 }
