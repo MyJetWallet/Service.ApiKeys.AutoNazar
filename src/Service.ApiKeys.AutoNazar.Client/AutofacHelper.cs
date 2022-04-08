@@ -14,6 +14,10 @@ namespace Service.ApiKeys.AutoNazar.Client
             builder.RegisterInstance(factory.GetEncryptionKeyGrpcService())
                 .As<IAutoNazarEncryptionKeyGrpcService>()
                 .SingleInstance();
+
+            builder.RegisterInstance(factory.GetApiKeyGrpcService())
+                .As<IAutoNazarApiKeyGrpcService>()
+                .SingleInstance();
         }
     }
 }
