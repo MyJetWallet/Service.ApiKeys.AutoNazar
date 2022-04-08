@@ -11,7 +11,7 @@ namespace Service.ApiKeys.AutoNazar.Client
         {
         }
 
-        //public IAutoNazarApiKeyGrpcService GetApiKeyGrpcService() => CreateGrpcService<IAutoNazarApiKeyGrpcService>();
+        public IAutoNazarApiKeyGrpcService GetApiKeyGrpcService() => CreateGrpcService<IAutoNazarApiKeyGrpcService>();
 
         public IAutoNazarEncryptionKeyGrpcService GetEncryptionKeyGrpcService() => CreateGrpcService<IAutoNazarEncryptionKeyGrpcService>();
     }

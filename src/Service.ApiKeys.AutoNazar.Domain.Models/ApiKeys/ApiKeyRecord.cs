@@ -1,7 +1,8 @@
 ﻿using System.Runtime.Serialization;
 
-namespace Service.ApiKeys.AutoNazar.Domain.Models
+namespace Service.ApiKeys.AutoNazar.Domain.Models.ApiKeys
 {
+    //This is record that is created on admin panel
     [DataContract]
     public class ApiKeyRecord
     {

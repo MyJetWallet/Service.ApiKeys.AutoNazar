@@ -5,20 +5,26 @@ using MyJetWallet.Sdk.Service;
 using System.Linq;
 using Service.ApiKeys.AutoNazar.Grpc;
 using Service.ApiKeys.AutoNazar.Grpc.Models;
-using Service.ApiKeys.AutoNazar.Encryption;
+using Service.ApiKeys.AutoNazar.Domain.Models.EncryptionKeys;
+using Service.ApiKeys.AutoNazar.Domain.Impl;
+using Service.ApiKeys.AutoNazar.Domain;
+using System.Collections.Generic;
 
 namespace MyJetWallet.ApiSecurityManager.Grpc.Services
 {
     public class AutoNazarEncryptionKeyGrpcService : IAutoNazarEncryptionKeyGrpcService
     {
-        private readonly AutoNazarEncryptionKeyStorage _encryptionKeyStorage;
+        private readonly IAutoNazarEncryptionKeyStorage _encryptionKeyStorage;
+        private readonly IAutoNazarApiKeyStorage _apiKeyStorage;
         private readonly ILogger<AutoNazarEncryptionKeyGrpcService> _logger;
 
         public AutoNazarEncryptionKeyGrpcService(
-            AutoNazarEncryptionKeyStorage encryptionKeyStorage,
+            IAutoNazarEncryptionKeyStorage encryptionKeyStorage,
+            IAutoNazarApiKeyStorage apiKeyStorage,
             ILogger<AutoNazarEncryptionKeyGrpcService> logger)
         {
             _encryptionKeyStorage = encryptionKeyStorage;
+            _apiKeyStorage = apiKeyStorage;
             _logger = logger;
         }
 
@@ -54,8 +60,6 @@ namespace MyJetWallet.ApiSecurityManager.Grpc.Services
         {
             _logger.LogInformation("SetEncryptionKeyResponse {context}", request.Id);
 
-            //var autoNazarId = $"{request.ServiceName}_{request.Id}";
-
             try
             {
                 _encryptionKeyStorage.AddOrUpdateEncryptionKey(new EncryptionKey()
@@ -65,40 +69,42 @@ namespace MyJetWallet.ApiSecurityManager.Grpc.Services
                     CheckWord = request.CheckWord,
                     Id = request.Id,
                 });
+                var apiKeys = await _apiKeyStorage.GetApiKeys();
+                var list = new List<string>();
+                var shoudResetEncKey = false;
 
-                var factory = new Autofac.ApiSecurityManagerClientFactory(request.ServiceUri);
-                var encryptionKeyClient = factory.GetEncryptionKeyGrpcService();
-
-                var response = await encryptionKeyClient.SetEncryptionKeyAsync(new()
+                if (apiKeys.Any())
                 {
-                    EncryptionKey = request.EncryptionKey,
-                    Id = request.Id,
-                    CheckWord = request.CheckWord,
-                });
+                    foreach (var item in apiKeys)
+                    {
+                        if (item.EncryptionKeyId == request.Id)
+                        {
+                            var unprotected = await _apiKeyStorage.Get(item.Id);
+                            if (unprotected.CheckWord?.Equals(request.CheckWord) ?? false)
+                            {
+                                list.Add(item.Id);
+                            }
+                            else
+                            {
+                                shoudResetEncKey = true;
+                                break;
+                            }
+                        }
+                    }
+                }
 
-                if (response.Error != null)
+                if (shoudResetEncKey)
                 {
-                    _logger?.LogError("SetEncryptionKeyAsync Error: {context}",
-                    (new {request.Id, response.Error}).ToJson());
                     _encryptionKeyStorage.RemoveEncryptionKey(request.Id);
-
                     return new SetEncryptionKeyResponse
                     {
                         ActivatedIds = Array.Empty<string>(),
                     };
                 }
 
-                if (response.ActivatedIds?.Any() ?? false)
-                {
-                    return new SetEncryptionKeyResponse
-                    {
-                        ActivatedIds = response.ActivatedIds,
-                    };
-                }
-
                 return new SetEncryptionKeyResponse
                 {
-                    ActivatedIds = Array.Empty<string>(),
+                    ActivatedIds = list.ToArray(),
                 };
             }
             catch (Exception e)

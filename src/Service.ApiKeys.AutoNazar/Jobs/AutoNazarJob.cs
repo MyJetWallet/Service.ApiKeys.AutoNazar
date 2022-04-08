@@ -6,11 +6,10 @@ using MyJetWallet.Sdk.Service.Tools;
 using MyNoSqlServer.Abstractions;
 using Polly;
 using Polly.Retry;
-using Service.ApiKeys.AutoNazar.Encryption;
+using Service.ApiKeys.AutoNazar.Domain;
+using Service.ApiKeys.AutoNazar.Domain.Impl;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot;
 
@@ -23,18 +22,21 @@ namespace Service.ApiKeys.AutoNazar.Jobs
         private readonly AsyncRetryPolicy _retryPolicy;
         private readonly IMyNoSqlServerDataReader<ApiKeyRecordNoSql> _reader;
         private readonly ITelegramBotClient _telegramBotClient;
-        private readonly AutoNazarEncryptionKeyStorage _encryptionKeyStorage;
+        private readonly IAutoNazarEncryptionKeyStorage _encryptionKeyStorage;
+        private readonly IAutoNazarApiKeyStorage _autoNazarApiKeyStorage;
 
         public AutoNazarJob(
             ILogger<AutoNazarJob> logger,
             IMyNoSqlServerDataReader<ApiKeyRecordNoSql> reader,
             ITelegramBotClient telegramBotClient,
-            AutoNazarEncryptionKeyStorage encryptionKeyStorage)
+            IAutoNazarEncryptionKeyStorage encryptionKeyStorage,
+            IAutoNazarApiKeyStorage autoNazarApiKeyStorage)
         {
             _logger = logger;
             _reader = reader;
             _telegramBotClient = telegramBotClient;
             _encryptionKeyStorage = encryptionKeyStorage;
+            _autoNazarApiKeyStorage = autoNazarApiKeyStorage;
             _timer = new MyTaskTimer(typeof(AutoNazarJob),
                 TimeSpan.FromSeconds(Program.Settings.CheckPeriodInSeconds),
                 logger,
@@ -57,9 +59,7 @@ namespace Service.ApiKeys.AutoNazar.Jobs
 
                     var factory = new ApiSecurityManagerClientFactory(item.ApiKey.ApplicationUri);
                     var apiKeyClient = factory.GetApiKeyService();
-                    var encryptionKeyGrpcService = factory.GetEncryptionKeyGrpcService();
                     var isApiKeySet = false;
-                    var isEncryptionKeySet = false;
 
                     await _retryPolicy.ExecuteAsync(async () =>
                     {
@@ -68,45 +68,46 @@ namespace Service.ApiKeys.AutoNazar.Jobs
                         isApiKeySet = apiKeys?.Ids?.Any(x => x == item.ApiKey.ApiKeyId) ?? false;
                     });
 
-                    await _retryPolicy.ExecuteAsync(async () =>
-                    {
-                        var encryptionKeys = await encryptionKeyGrpcService.GetEncryptionKeyIdsAsync(new MyJetWallet.ApiSecurityManager.Grpc.Models.GetEncryptionKeyIdsRequest());
+                    _logger.LogInformation("Checking for: {item}, isApiKeySet: {isApiKeySet}",
+                        item.ToJson(), isApiKeySet);
 
-                        isEncryptionKeySet = encryptionKeys?.Ids?.Any(x => x == item.ApiKey.EncryptionKeyId) ?? false;
-                    });
-
-                    _logger.LogInformation("Checking for: {item}, isApiKeySet: {isApiKeySet}, isEncryptionKeySet: {isEncryptionKeySet}",
-                        item.ToJson(), isApiKeySet, isEncryptionKeySet);
-
-                    var encKey = _encryptionKeyStorage.GetEncryptionKey($"{item.ApiKey.EncryptionKeyId}");
+                    var encKey = _encryptionKeyStorage.GetEncryptionKey(item.ApiKey.EncryptionKeyId);
 
                     if (encKey == null)
                     {
                         await _telegramBotClient.SendTextMessageAsync(Program.Settings.TelegramChatId,
-                            $"AutoNazar has no key! {item.ApiKey.ApplicationName} {item.ApiKey.EncryptionKeyId}!");
+                            $"AutoNazar has no encryption key! {item.ApiKey.ApplicationName} {item.ApiKey.EncryptionKeyId}!");
+
+                        continue;
                     }
 
-                    if (isApiKeySet && !isEncryptionKeySet)
-                    {
-                        if (encKey == null)
-                        { return; }
+                    var apiKey = await _autoNazarApiKeyStorage.Get(item.ApiKey.ApiKeyId);
 
-                        var response = await encryptionKeyGrpcService.SetEncryptionKeyAsync(new MyJetWallet.ApiSecurityManager.Grpc.Models.SetEncryptionKeyRequest
+                    if (apiKey == null)
+                    {
+                        await _telegramBotClient.SendTextMessageAsync(Program.Settings.TelegramChatId,
+                            $"AutoNazar has no ApiKey! {item.ApiKey.ApplicationName} {item.ApiKey.ApiKeyId}!");
+
+                        continue;
+                    }
+
+                    var response = await apiKeyClient.SetApiKeysAsync(
+                        new MyJetWallet.ApiSecurityManager.Grpc.Models.SetApiKeyRequest
                         {
-                            CheckWord = encKey.CheckWord,
-                            EncryptionKey = encKey.EncryptionKeyValue,
-                            Id = item.ApiKey.EncryptionKeyId,
+                            ApiKey = apiKey.ApiKeyValue,
+                            ApiKeyId = apiKey.Id,
+                            EncryptionKeyId = apiKey.EncryptionKeyId,
+                            PrivateKey = apiKey.PrivateKeyValue,
                         });
 
-                        if (response.Error != null)
-                        {
-                            _logger.LogError("When AutoNazarJob this error happened: {error}", response.Error.ToJson());
-                        }
-                        else
-                        {
-                            _logger.LogInformation("Encryption is set for: {item}, isApiKeySet: {isApiKeySet}, isEncryptionKeySet: {isEncryptionKeySet}",
-                        item.ToJson(), isApiKeySet, true);
-                        }
+                    if (response.Error != null)
+                    {
+                        _logger.LogError("When AutoNazarJob this error happened: {error}", response.Error.ToJson());
+                    }
+                    else
+                    {
+                        _logger.LogInformation("ApiKey is set for: {item}, isApiKeySet: {isApiKeySet}",
+                                                item.ToJson(), isApiKeySet);
                     }
                 }
             }

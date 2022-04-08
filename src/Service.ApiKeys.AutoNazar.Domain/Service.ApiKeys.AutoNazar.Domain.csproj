@@ -4,4 +4,13 @@
     <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="MyJetWallet.ApiSecurityManager" Version="2.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Service.ApiKeys.AutoNazar.Domain.Models\Service.ApiKeys.AutoNazar.Domain.Models.csproj" />
+    <ProjectReference Include="..\Service.ApiKeys.AutoNazar.NoSql\Service.ApiKeys.AutoNazar.NoSql.csproj" />
+  </ItemGroup>
+
 </Project>

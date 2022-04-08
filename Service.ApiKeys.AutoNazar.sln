@@ -32,6 +32,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Service.ApiKeys.AutoNazar.D
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Service.ApiKeys.AutoNazar.Tests", "test\Service.ApiKeys.AutoNazar.Tests\Service.ApiKeys.AutoNazar.Tests.csproj", "{9733377E-0BB9-4FB9-BF24-9F7C7F5970BD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Service.ApiKeys.AutoNazar.NoSql", "src\Service.ApiKeys.AutoNazar.NoSql\Service.ApiKeys.AutoNazar.NoSql.csproj", "{2AF4852D-72BA-4AD7-B88A-BD88F2EB1C53}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -66,6 +68,10 @@ Global
 		{9733377E-0BB9-4FB9-BF24-9F7C7F5970BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9733377E-0BB9-4FB9-BF24-9F7C7F5970BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9733377E-0BB9-4FB9-BF24-9F7C7F5970BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2AF4852D-72BA-4AD7-B88A-BD88F2EB1C53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2AF4852D-72BA-4AD7-B88A-BD88F2EB1C53}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2AF4852D-72BA-4AD7-B88A-BD88F2EB1C53}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2AF4852D-72BA-4AD7-B88A-BD88F2EB1C53}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -77,6 +83,7 @@ Global
 		{B64315EC-2356-4586-8A89-111D88A942B8} = {EB832FF1-4E01-40ED-BAC4-5ECF70F5C108}
 		{5CFE74A4-CDBB-4E2D-9C0A-9CEF20DCB38B} = {446301A0-97F2-4921-BA0B-32B76039C73B}
 		{9733377E-0BB9-4FB9-BF24-9F7C7F5970BD} = {D11EB899-A148-4C9B-B340-B907EF71C4A2}
+		{2AF4852D-72BA-4AD7-B88A-BD88F2EB1C53} = {446301A0-97F2-4921-BA0B-32B76039C73B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6BF00C9D-AD55-40F2-8FE3-E5C3559B3E26}

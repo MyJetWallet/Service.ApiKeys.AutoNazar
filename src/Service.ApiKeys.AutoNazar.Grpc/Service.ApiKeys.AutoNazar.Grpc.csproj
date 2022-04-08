@@ -5,12 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MyJetWallet.ApiSecurityManager" Version="1.2.4" />
     <PackageReference Include="System.ServiceModel.Primitives" Version="4.9.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Service.ApiKeys.AutoNazar.Domain.Models\Service.ApiKeys.AutoNazar.Domain.Models.csproj" />
+    <ProjectReference Include="..\Service.ApiKeys.AutoNazar.NoSql\Service.ApiKeys.AutoNazar.NoSql.csproj" />
   </ItemGroup>
 
 </Project>

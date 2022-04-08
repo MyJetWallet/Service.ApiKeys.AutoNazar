@@ -1,5 +1,5 @@
 ﻿using MyNoSqlServer.Abstractions;
-using Service.ApiKeys.AutoNazar.Domain.Models;
+using Service.ApiKeys.AutoNazar.Domain.Models.ApiKeys;
 
 namespace Service.ApiKeys.AutoNazar.Jobs
 {

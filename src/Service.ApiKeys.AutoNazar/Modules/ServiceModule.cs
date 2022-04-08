@@ -1,18 +1,25 @@
 ﻿using Autofac;
 using MyJetWallet.ApiSecurityManager.Autofac;
+using MyJetWallet.ApiSecurityManager.SymmetricEncryption;
 using MyJetWallet.Sdk.NoSql;
-using Service.ApiKeys.AutoNazar.Encryption;
+using Service.ApiKeys.AutoNazar.Domain;
+using Service.ApiKeys.AutoNazar.Domain.Impl;
 using Service.ApiKeys.AutoNazar.Jobs;
+using Service.ApiKeys.AutoNazar.NoSql;
 using Telegram.Bot;
 
 namespace Service.ApiKeys.AutoNazar.Modules
 {
-    public class ServiceModule: Module
+    public class ServiceModule : Module
     {
         protected override void Load(ContainerBuilder builder)
         {
             var telegramBot = new TelegramBotClient(Program.Settings.BotApiKey);
             var myNoSqlClient = builder.CreateNoSqlClient(() => Program.Settings.MyNoSqlReaderHostPort);
+
+            builder.RegisterMyNoSqlWriter<ApiKeyNoSqlEntity>(
+                  () => Program.Settings.MyNoSqlWriterUrl,
+                        ApiKeyNoSqlEntity.TableName);
 
             builder.RegisterInstance(telegramBot)
                 .As<ITelegramBotClient>()
@@ -20,7 +27,7 @@ namespace Service.ApiKeys.AutoNazar.Modules
 
             builder.RegisterMyNoSqlReader<ApiKeyRecordNoSql>(myNoSqlClient, ApiKeyRecordNoSql.TableName);
 
-            builder.RegisterEncryptionServiceClient("auto-nazar", null);
+            //builder.RegisterEncryptionServiceClient("auto-nazar", null);
 
             builder
                .RegisterType<AutoNazarJob>()
@@ -30,9 +37,20 @@ namespace Service.ApiKeys.AutoNazar.Modules
 
             builder
                .RegisterType<AutoNazarEncryptionKeyStorage>()
-               .AsSelf()
+               .As<IAutoNazarEncryptionKeyStorage>()
                .AutoActivate()
                .SingleInstance();
+
+            builder
+               .RegisterType<AutoNazarApiKeyStorage>()
+               .As<IAutoNazarApiKeyStorage>()
+               .AutoActivate()
+               .SingleInstance();
+
+            builder
+                .RegisterType<SymmetricEncryptionService>()
+                .As<ISymmetricEncryptionService>()
+                .SingleInstance();
         }
     }
 }

@@ -2,7 +2,7 @@
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Service.ApiKeys.AutoNazar.Encryption
+namespace Service.ApiKeys.AutoNazar.Domain.Models.EncryptionKeys
 {
     public class EncryptionKey
     {

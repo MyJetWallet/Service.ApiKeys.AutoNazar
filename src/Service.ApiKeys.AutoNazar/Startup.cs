@@ -44,6 +44,7 @@ namespace Service.ApiKeys.AutoNazar
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapGrpcSchema<AutoNazarEncryptionKeyGrpcService, IAutoNazarEncryptionKeyGrpcService>();
+                endpoints.MapGrpcSchema<AutoNazarApiKeyGrpcService, IAutoNazarApiKeyGrpcService>();
 
                 endpoints.MapGrpcSchemaRegistry();
 
