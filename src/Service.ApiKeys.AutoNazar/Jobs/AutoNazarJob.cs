@@ -50,8 +50,8 @@ namespace Service.ApiKeys.AutoNazar.Jobs
                 var all = _reader.Get();
                 var allApiKeys = await _autoNazarApiKeyStorage.GetIdsList();
 
-                var notSetEncKeys = all.Select(x => x.ApiKey.EncryptionKeyId).Where(x => !_encryptionKeyStorage.Contains(x));
-                var notSetApiKeys = all.Select(x => x.ApiKey.ApiKeyId).Except(allApiKeys);
+                var notSetEncKeys = all.Select(x => x.ApiKey.EncryptionKeyId).Where(x => !_encryptionKeyStorage.Contains(x)).Distinct();
+                var notSetApiKeys = all.Select(x => x.ApiKey.ApiKeyId).Except(allApiKeys).Distinct();
 
                 foreach (var item in notSetEncKeys)
                 {
