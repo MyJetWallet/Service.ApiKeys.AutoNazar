@@ -9,6 +9,7 @@ namespace Service.ApiKeys.AutoNazar.Domain
 
         IReadOnlyCollection<string> GetIdsList();
 
+        bool Contains(string id);
         byte[] GetEncryptionKey(string id);
         bool RemoveEncryptionKey(string id);
     }

@@ -19,7 +19,6 @@ namespace Service.ApiKeys.AutoNazar.Jobs
     {
         private readonly ILogger<AutoNazarJob> _logger;
         private readonly MyTaskTimer _timer;
-        private readonly AsyncRetryPolicy _retryPolicy;
         private readonly IMyNoSqlServerDataReader<ApiKeyRecordNoSql> _reader;
         private readonly ITelegramBotClient _telegramBotClient;
         private readonly IAutoNazarEncryptionKeyStorage _encryptionKeyStorage;
@@ -41,9 +40,6 @@ namespace Service.ApiKeys.AutoNazar.Jobs
                 TimeSpan.FromSeconds(Program.Settings.CheckPeriodInSeconds),
                 logger,
                 DoProcess);
-            _retryPolicy = Policy
-                          .Handle<Exception>()
-                          .WaitAndRetryAsync(3, (i) => TimeSpan.FromMilliseconds(100 * (int)Math.Pow(2, i)));
         }
 
         private async Task DoProcess()
@@ -52,29 +48,31 @@ namespace Service.ApiKeys.AutoNazar.Jobs
             try
             {
                 var all = _reader.Get();
+                var allApiKeys = await _autoNazarApiKeyStorage.GetIdsList();
+
+                var notSetEncKeys = all.Select(x => x.ApiKey.EncryptionKeyId).Where(x => !_encryptionKeyStorage.Contains(x));
+                var notSetApiKeys = all.Select(x => x.ApiKey.ApiKeyId).Except(allApiKeys);
+
+                foreach (var item in notSetEncKeys)
+                {
+                    await _telegramBotClient.SendTextMessageAsync(Program.Settings.TelegramChatId,
+                            $"AutoNazar has no encryption key! {item}!");
+                }
+
+                foreach (var item in notSetApiKeys)
+                {
+                    await _telegramBotClient.SendTextMessageAsync(Program.Settings.TelegramChatId,
+                            $"AutoNazar has no ApiKey! {item}!");
+                }
 
                 foreach (var item in all)
                 {
                     _logger.LogInformation("Checking for: {item}", item.ToJson());
-                    //var isApiKeySet = false;
-
-                    //await _retryPolicy.ExecuteAsync(async () =>
-                    //{
-                    //    var apiKeys = await apiKeyClient.GetApiKeyIdsAsync(new MyJetWallet.ApiSecurityManager.Grpc.Models.GetApiKeyIdsRequest());
-
-                    //    isApiKeySet = apiKeys?.Ids?.Any(x => x == item.ApiKey.ApiKeyId) ?? false;
-                    //});
-
-                    _logger.LogInformation("Checking for: {item}",
-                        item.ToJson());
 
                     var encKey = _encryptionKeyStorage.GetEncryptionKey(item.ApiKey.EncryptionKeyId);
 
                     if (encKey == null)
                     {
-                        await _telegramBotClient.SendTextMessageAsync(Program.Settings.TelegramChatId,
-                            $"AutoNazar has no encryption key! {item.ApiKey.ApplicationName} {item.ApiKey.EncryptionKeyId}!");
-
                         continue;
                     }
 
@@ -82,9 +80,6 @@ namespace Service.ApiKeys.AutoNazar.Jobs
 
                     if (apiKey == null)
                     {
-                        await _telegramBotClient.SendTextMessageAsync(Program.Settings.TelegramChatId,
-                            $"AutoNazar has no ApiKey! {item.ApiKey.ApplicationName} {item.ApiKey.ApiKeyId}!");
-
                         continue;
                     }
 

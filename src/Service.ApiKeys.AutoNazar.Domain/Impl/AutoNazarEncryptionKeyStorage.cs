@@ -31,6 +31,11 @@ namespace Service.ApiKeys.AutoNazar.Domain.Impl
             _storage.AddOrUpdate(encryptionKey.Id, encryptedKey, (x, y) => encryptedKey);
         }
 
+        public bool Contains(string id)
+        {
+            return _storage.ContainsKey(id);
+        }
+
         public byte[] GetEncryptionKey(string id)
         {
             if (!_storage.TryGetValue(id, out var key))
