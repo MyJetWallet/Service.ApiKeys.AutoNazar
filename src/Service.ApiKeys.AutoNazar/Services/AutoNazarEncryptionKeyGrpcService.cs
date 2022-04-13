@@ -64,7 +64,6 @@ namespace MyJetWallet.ApiSecurityManager.Grpc.Services
             {
                 _encryptionKeyStorage.AddOrUpdateEncryptionKey(new EncryptionKey()
                 {
-                    ServiceName = request.ServiceName,
                     EncryptionKeyValue = request.EncryptionKey,
                     CheckWord = request.CheckWord,
                     Id = request.Id,

@@ -35,9 +35,36 @@ namespace MyJetWallet.ApiSecurityManager.Grpc.Services
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error Set Api Keys");
+                _logger.LogError(e, "GetApiKeyIdsAsync");
 
                 return new GetApiKeyIdsResponse
+                {
+                    Error = new ErrorResponse
+                    {
+                        Code = ErrorCode.Unknown,
+                        Message = e.Message,
+                    }
+                };
+            }
+
+        }
+
+        public async Task<GetApiKeysResponse> GetApiKeysAsync(GetApiKeysRequest request)
+        {
+            try
+            {
+                var list = await _apiKeyStorage.GetApiKeys();
+
+                return new GetApiKeysResponse
+                {
+                    Ids = list
+                };
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error GetApiKeysAsync");
+
+                return new GetApiKeysResponse
                 {
                     Error = new ErrorResponse
                     {
@@ -63,21 +90,21 @@ namespace MyJetWallet.ApiSecurityManager.Grpc.Services
 
             try
             {
-                var factory = new ApiSecurityManagerClientFactory(request.ApplicationUri);
-                var apiKeyService = factory.GetApiKeyService();
+                //var factory = new ApiSecurityManagerClientFactory(request.ApplicationUri);
+                //var apiKeyService = factory.GetApiKeyService();
 
-                var response = await apiKeyService.SetApiKeysAsync(new ()
-                {
-                    ApiKey = request.ApiKey,
-                    ApiKeyId = request.ApiKeyId,
-                    EncryptionKeyId = request.EncryptionKeyId,
-                    PrivateKey = privateKey,
-                });
+                //var response = await apiKeyService.SetApiKeysAsync(new ()
+                //{
+                //    ApiKey = request.ApiKey,
+                //    ApiKeyId = request.ApiKeyId,
+                //    EncryptionKeyId = request.EncryptionKeyId,
+                //    PrivateKey = privateKey,
+                //});
 
-                if (response.Error != null)
-                {
-                    throw new Exception($"Grpc Error from application: {request.ApplicationUri} {response.Error.Code}:{response.Error.Message}");
-                }
+                //if (response.Error != null)
+                //{
+                //    throw new Exception($"Grpc Error from application: {request.ApplicationUri} {response.Error.Code}:{response.Error.Message}");
+                //}
 
                 await _apiKeyStorage.AddOrUpdate(ApiKey.Create(
                     request.ApiKeyId,

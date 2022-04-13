@@ -15,5 +15,8 @@ namespace Service.ApiKeys.AutoNazar.Grpc
 
         [OperationContract]
         Task<DeleteApiKeyResponse> DeleteApiKeyAsync(DeleteApiKeyRequest request);
+
+        [OperationContract]
+        Task<GetApiKeysResponse> GetApiKeysAsync(GetApiKeysRequest request);
     }
 }

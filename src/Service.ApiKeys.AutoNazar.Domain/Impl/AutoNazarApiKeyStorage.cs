@@ -69,11 +69,15 @@ namespace Service.ApiKeys.AutoNazar.Domain.Impl
                 key.ApiKey.EncryptionKeyId, decryptedPrivateKey, key.ApiKey.RegisterDate);
         }
 
-        public async Task<IReadOnlyCollection<ApiKey>> GetApiKeys()
+        public async Task<IReadOnlyCollection<ApiKeyId>> GetApiKeys()
         {
             var all = await _writer.GetAsync(ApiKeyNoSqlEntity.GeneratePartitionKey());
 
-            return all.Select(x => x.ApiKey).ToArray();
+            return all.Select(x => new ApiKeyId
+            {
+                EncryptionKeyId = x.ApiKey.EncryptionKeyId,
+                Id = x.ApiKey.Id,
+            }).ToArray();
         }
 
         public async Task<IReadOnlyCollection<string>> GetIdsList()

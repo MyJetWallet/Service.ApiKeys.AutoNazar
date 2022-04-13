@@ -10,7 +10,7 @@ namespace Service.ApiKeys.AutoNazar.Domain
 
         Task<IReadOnlyCollection<string>> GetIdsList();
 
-        Task<IReadOnlyCollection<ApiKey>> GetApiKeys();
+        Task<IReadOnlyCollection<ApiKeyId>> GetApiKeys();
 
         Task<ApiKey> Get(string id);
         Task Remove(string id);
