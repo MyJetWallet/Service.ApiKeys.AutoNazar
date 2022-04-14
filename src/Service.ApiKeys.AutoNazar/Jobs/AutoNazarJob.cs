@@ -83,27 +83,35 @@ namespace Service.ApiKeys.AutoNazar.Jobs
                         continue;
                     }
 
-                    var factory = new ApiSecurityManagerClientFactory(item.ApiKey.ApplicationUri);
-                    var apiKeyClient = factory.GetApiKeyService();
+                    try
+                    {
+                        var factory = new ApiSecurityManagerClientFactory(item.ApiKey.ApplicationUri);
+                        var apiKeyClient = factory.GetApiKeyService();
 
-                    var response = await apiKeyClient.SetApiKeysAsync(
-                        new MyJetWallet.ApiSecurityManager.Grpc.Models.SetApiKeyRequest
+                        var response = await apiKeyClient.SetApiKeysAsync(
+                            new MyJetWallet.ApiSecurityManager.Grpc.Models.SetApiKeyRequest
+                            {
+                                ApiKey = apiKey.ApiKeyValue,
+                                ApiKeyId = apiKey.Id,
+                                EncryptionKeyId = apiKey.EncryptionKeyId,
+                                PrivateKey = apiKey.PrivateKeyValue,
+                            });
+
+                        if (response.Error != null)
                         {
-                            ApiKey = apiKey.ApiKeyValue,
-                            ApiKeyId = apiKey.Id,
-                            EncryptionKeyId = apiKey.EncryptionKeyId,
-                            PrivateKey = apiKey.PrivateKeyValue,
-                        });
-
-                    if (response.Error != null)
-                    {
-                        _logger.LogError("When AutoNazarJob this error happened: {error}", response.Error.ToJson());
+                            _logger.LogError("When AutoNazarJob this error happened: {error}", response.Error.ToJson());
+                        }
+                        else
+                        {
+                            _logger.LogInformation("ApiKey is set for: {item}",
+                                                    item.ToJson());
+                        }
                     }
-                    else
+                    catch (Exception e)
                     {
-                        _logger.LogInformation("ApiKey is set for: {item}",
-                                                item.ToJson());
+                        _logger.LogError(e, "When AutoNazarJob this error happened. CONTINUE: {context}", item.ToJson());
                     }
+                    
                 }
             }
             catch (Exception e)
