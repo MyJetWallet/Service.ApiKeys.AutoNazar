@@ -8,7 +8,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="MyJetWallet.Sdk.Service" Version="2.1.7" />
-		<PackageReference Include="MyJetWallet.Sdk.NoSql" Version="2.1.2" />
+		<PackageReference Include="MyJetWallet.Sdk.NoSql" Version="2.1.6" />
 	</ItemGroup>
 
 	<ItemGroup>
