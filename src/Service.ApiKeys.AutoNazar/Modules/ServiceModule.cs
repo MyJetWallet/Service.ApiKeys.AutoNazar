@@ -15,7 +15,7 @@ namespace Service.ApiKeys.AutoNazar.Modules
         protected override void Load(ContainerBuilder builder)
         {
             var telegramBot = new TelegramBotClient(Program.Settings.BotApiKey);
-            var myNoSqlClient = builder.CreateNoSqlClient(() => Program.Settings.MyNoSqlReaderHostPort);
+            var myNoSqlClient = builder.CreateNoSqlClient(Program.Settings.MyNoSqlReaderHostPort, Program.LogFactory);
 
             builder.RegisterMyNoSqlWriter<ApiKeyNoSqlEntity>(
                   () => Program.Settings.MyNoSqlWriterUrl,
