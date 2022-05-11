@@ -2,6 +2,7 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using MyJetWallet.ApiSecurityManager.Hashing;
 using MyJetWallet.ApiSecurityManager.SymmetricEncryption;
 using MyNoSqlServer.Abstractions;
 using NUnit.Framework;
@@ -85,6 +86,11 @@ namespace Service.ApiKeys.AutoNazar.Tests
             container
                 .RegisterType<SymmetricEncryptionService>()
                 .As<ISymmetricEncryptionService>()
+                .SingleInstance();
+
+            container
+                .RegisterType<HashingService>()
+                .AsSelf()
                 .SingleInstance();
 
             container
