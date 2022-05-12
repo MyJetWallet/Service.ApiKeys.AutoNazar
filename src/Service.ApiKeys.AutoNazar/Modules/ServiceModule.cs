@@ -28,11 +28,7 @@ namespace Service.ApiKeys.AutoNazar.Modules
 
             builder.RegisterMyNoSqlReader<ApiKeyRecordNoSql>(myNoSqlClient, ApiKeyRecordNoSql.TableName);
 
-            //builder.RegisterEncryptionServiceClient("auto-nazar", null);
-            builder
-            .RegisterType<HashingService>()
-            .AsSelf()
-            .SingleInstance();
+            builder.RegisterEncryptionServiceClient();
 
             builder
                .RegisterType<AutoNazarJob>()
