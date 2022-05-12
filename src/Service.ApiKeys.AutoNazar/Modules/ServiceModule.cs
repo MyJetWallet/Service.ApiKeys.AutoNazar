@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using MyJetWallet.ApiSecurityManager.Autofac;
+using MyJetWallet.ApiSecurityManager.Hashing;
 using MyJetWallet.ApiSecurityManager.SymmetricEncryption;
 using MyJetWallet.Sdk.NoSql;
 using Service.ApiKeys.AutoNazar.Domain;
@@ -28,6 +29,10 @@ namespace Service.ApiKeys.AutoNazar.Modules
             builder.RegisterMyNoSqlReader<ApiKeyRecordNoSql>(myNoSqlClient, ApiKeyRecordNoSql.TableName);
 
             //builder.RegisterEncryptionServiceClient("auto-nazar", null);
+            builder
+            .RegisterType<HashingService>()
+            .AsSelf()
+            .SingleInstance();
 
             builder
                .RegisterType<AutoNazarJob>()
