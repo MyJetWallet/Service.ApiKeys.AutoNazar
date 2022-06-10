@@ -19,17 +19,17 @@ namespace Service.ApiKeys.AutoNazar.Tests
             throw new NotImplementedException();
         }
 
-        public ValueTask BulkInsertOrReplaceAsync(IEnumerable<T> entity, DataSynchronizationPeriod dataSynchronizationPeriod = DataSynchronizationPeriod.Sec5)
+        public ValueTask BulkInsertOrReplaceAsync(IReadOnlyList<T> entity, DataSynchronizationPeriod dataSynchronizationPeriod = DataSynchronizationPeriod.Sec5)
         {
             throw new NotImplementedException();
         }
 
-        public ValueTask CleanAndBulkInsertAsync(IEnumerable<T> entity, DataSynchronizationPeriod dataSynchronizationPeriod = DataSynchronizationPeriod.Sec5)
+        public ValueTask CleanAndBulkInsertAsync(IReadOnlyList<T> entity, DataSynchronizationPeriod dataSynchronizationPeriod = DataSynchronizationPeriod.Sec5)
         {
             throw new NotImplementedException();
         }
 
-        public ValueTask CleanAndBulkInsertAsync(string partitionKey, IEnumerable<T> entity, DataSynchronizationPeriod dataSynchronizationPeriod = DataSynchronizationPeriod.Sec5)
+        public ValueTask CleanAndBulkInsertAsync(string partitionKey, IReadOnlyList<T> entity, DataSynchronizationPeriod dataSynchronizationPeriod = DataSynchronizationPeriod.Sec5)
         {
             throw new NotImplementedException();
         }
@@ -59,12 +59,12 @@ namespace Service.ApiKeys.AutoNazar.Tests
             throw new NotImplementedException();
         }
 
-        public ValueTask<IEnumerable<T>> GetAsync()
+        public ValueTask<List<T>> GetAsync()
         {
             throw new NotImplementedException();
         }
 
-        public ValueTask<IEnumerable<T>> GetAsync(string partitionKey)
+        public ValueTask<List<T>> GetAsync(string partitionKey)
         {
             throw new NotImplementedException();
         }
@@ -82,12 +82,12 @@ namespace Service.ApiKeys.AutoNazar.Tests
             throw new NotImplementedException();
         }
 
-        public ValueTask<IEnumerable<T>> GetHighestRowAndBelow(string partitionKey, string rowKeyFrom, int amount)
+        public ValueTask<List<T>> GetHighestRowAndBelow(string partitionKey, string rowKeyFrom, int amount)
         {
             throw new NotImplementedException();
         }
 
-        public ValueTask<IReadOnlyList<T>> GetMultipleRowKeysAsync(string partitionKey, IEnumerable<string> rowKeys)
+        public ValueTask<List<T>> GetMultipleRowKeysAsync(string partitionKey, IReadOnlyList<string> rowKeys)
         {
             throw new NotImplementedException();
         }
@@ -109,7 +109,7 @@ namespace Service.ApiKeys.AutoNazar.Tests
             throw new NotImplementedException();
         }
 
-        public ValueTask<IEnumerable<T>> QueryAsync(string query)
+        public ValueTask<List<T>> QueryAsync(string query)
         {
             throw new NotImplementedException();
         }
